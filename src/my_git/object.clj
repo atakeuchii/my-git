@@ -39,9 +39,10 @@
   (let [bytes (object-bytes type content)
         hash (sha1-hex bytes)
         file (object-path git-dir hash)]
-    (io/make-parents file)
-    (with-open [out (io/output-stream file)]
-      (.write out (zlib-compress bytes)))
+    (when-not (.exists file)
+      (io/make-parents file)
+      (with-open [out (io/output-stream file)]
+        (.write out (zlib-compress bytes))))
     hash))
 
 (defn- index-of-zero
