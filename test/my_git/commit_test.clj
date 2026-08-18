@@ -1,17 +1,13 @@
 (ns my-git.commit-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.object :as obj]
             [my-git.tree :as tree]
             [my-git.commit :as commit]
-            [my-git.test-util :refer [temp-git-dir]]))
+            [my-git.test-util :refer [temp-git-dir spit-file]]))
 
 (def ident {:name "Aki" :email "aki@example.com" :timestamp 1700000000 :tz "+0900"})
-
-(defn- spit-file [root path content]
-  (let [f (io/file root path)] (io/make-parents f) (spit f content)))
 
 (defn- git-env
   "現在の環境に author/committer と日付を上書きした env マップ。commit hash を固定する。"

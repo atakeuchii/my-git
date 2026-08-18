@@ -4,11 +4,8 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.index :as index]
-            [my-git.test-util :refer [temp-git-dir]])
+            [my-git.test-util :refer [temp-git-dir spit-file]])
   (:import [java.nio.file Files]))
-
-(defn- spit-file [root path content]
-  (let [f (io/file root path)] (io/make-parents f) (spit f content)))
 
 (def a-sha "ce013625030ba8dba906f756967f9e9ca394464a")   ; "hello\n"
 (def b-sha "cc628ccd10742baea8241c5924df992b5c019f71")   ; "world\n"

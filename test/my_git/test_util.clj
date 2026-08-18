@@ -10,3 +10,8 @@
     (.delete d) (.mkdir d)
     (sh/sh "git" "init" "-q" :dir d)
     {:root d :git-dir (io/file d ".git")}))
+
+(defn spit-file [root path content]
+  (let [f (io/file root path)]
+    (io/make-parents f)
+    (spit f content)))

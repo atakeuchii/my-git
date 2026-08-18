@@ -1,22 +1,10 @@
 (ns my-git.tree-test
   (:require [clojure.test :refer [deftest is testing]]
-            [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.object :as obj]
             [my-git.tree :as tree]
-            [my-git.test-util :refer [temp-git-dir]]))
-
-;; (defn- temp-repo []
-;;   (let [d (java.io.File/createTempFile "mygit" "")]
-;;     (.delete d) (.mkdir d)
-;;     (sh/sh "git" "init" "-q" :dir d)
-;;     {:root d :git-dir (io/file d ".git")}))
-
-(defn- spit-file [root path content]
-  (let [f (io/file root path)]
-    (io/make-parents f)
-    (spit f content)))
+            [my-git.test-util :refer [temp-git-dir spit-file]]))
 
 (deftest root-hash-matches-git
   (testing "ネスト tree の hash が本物 git の write-tree と一致する"
