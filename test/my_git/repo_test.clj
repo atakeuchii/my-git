@@ -5,20 +5,7 @@
             [clojure.string :as str]
             [my-git.repo :as repo]
             [my-git.commit :as commit]
-            [my-git.test-util :refer [spit-file]]))
-
-(def ident {:name "Aki" :email "aki@example.com" :timestamp 1700000000 :tz "+0900"})
-
-(defn- temp-dir []
-  (let [d (java.io.File/createTempFile "mygit" "")]
-    (.delete d) (.mkdir d) d))
-
-(defn- git-env []
-  (merge (into {} (System/getenv))
-         {"GIT_AUTHOR_NAME" (:name ident)    "GIT_AUTHOR_EMAIL" (:email ident)
-          "GIT_COMMITTER_NAME" (:name ident) "GIT_COMMITTER_EMAIL" (:email ident)
-          "GIT_AUTHOR_DATE"    "1700000000 +0900"
-          "GIT_COMMITTER_DATE" "1700000000 +0900"}))
+            [my-git.test-util :refer [ident spit-file temp-dir git-env]]))
 
 (defn- git-oracle-commit
   "別 temp repo で同じ内容を git add→write-tree→commit-tree し commit hash を返す（オラクル）。"

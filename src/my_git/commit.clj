@@ -50,4 +50,3 @@
                     m)))
               {:parents [] :message message}
               (str/split header #"\n")))))
-
