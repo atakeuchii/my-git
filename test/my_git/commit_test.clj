@@ -1,11 +1,13 @@
 (ns my-git.commit-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.object :as obj]
             [my-git.tree :as tree]
             [my-git.commit :as commit]
-            [my-git.test-util :refer [temp-git-dir spit-file]]))
+            [my-git.test-util :refer [temp-git-dir spit-file cleanup-fixture]]))
+
+(use-fixtures :each cleanup-fixture)
 
 (def ident {:name "Aki" :email "aki@example.com" :timestamp 1700000000 :tz "+0900"})
 

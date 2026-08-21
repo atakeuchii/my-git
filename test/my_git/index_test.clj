@@ -1,11 +1,13 @@
 (ns my-git.index-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.index :as index]
-            [my-git.test-util :refer [temp-git-dir spit-file]])
+            [my-git.test-util :refer [temp-git-dir spit-file cleanup-fixture]])
   (:import [java.nio.file Files]))
+
+(use-fixtures :each cleanup-fixture)
 
 (def a-sha "ce013625030ba8dba906f756967f9e9ca394464a")   ; "hello\n"
 (def b-sha "cc628ccd10742baea8241c5924df992b5c019f71")   ; "world\n"

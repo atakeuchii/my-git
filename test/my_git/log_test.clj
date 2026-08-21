@@ -1,12 +1,14 @@
 (ns my-git.log-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [clojure.java.io :as io]
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.repo :as repo]
             [my-git.ref :as ref]
             [my-git.log :as glog]
-            [my-git.test-util :refer [ident spit-file temp-dir git-env]]))
+            [my-git.test-util :refer [ident spit-file temp-dir git-env cleanup-fixture]]))
+
+(use-fixtures :each cleanup-fixture)
 
 (defn- make-3-commit-repo
   "自作 init→add→commit で3コミットの直線履歴を作る。"

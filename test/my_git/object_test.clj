@@ -1,5 +1,5 @@
 (ns my-git.object-test
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.test :refer [deftest is testing use-fixtures]]
             [clojure.test.check.clojure-test :refer [defspec]]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.generators :as gen]
@@ -7,8 +7,10 @@
             [clojure.java.shell :as sh]
             [clojure.string :as str]
             [my-git.object :as obj]
-            [my-git.test-util :refer [temp-git-dir]])
+            [my-git.test-util :refer [temp-git-dir cleanup-fixture]])
   (:import [java.io File]))
+
+(use-fixtures :each cleanup-fixture)
 
 (defn- git-hash-object
   "本物 git に content を hash-object させて hash を返す（参照オラクル、repo不要）。"
