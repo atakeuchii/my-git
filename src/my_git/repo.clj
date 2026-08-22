@@ -4,6 +4,7 @@
             [clojure.string :as str]
             [my-git.commit :as commit]
             [my-git.index :as index]
+            [my-git.merge :as mg]
             [my-git.object :as obj]
             [my-git.ref :as ref]
             [my-git.tree :as tree])
@@ -256,3 +257,55 @@
                 (if (some #{p} untracked)
                   (str "?? " p)
                   (str (get x p " ") (get y p " ") " " p))))))
+
+(defn- materialize!
+  "entries を作業ツリー+index に展開（checkout の中身と同じ機構）。"
+  [dir git-dir entries]
+  (let [target-paths (set (map :path entries))
+        current (when (.exists (io/file git-dir "index"))
+                  (index/read-index git-dir))]
+    (doseq [p (remove target-paths (map :path current))]
+      (.delete (io/file dir p)))
+    (doseq [{:keys [mode sha path]} entries]
+      (let [content (:content (obj/read-object git-dir sha))
+            f (io/file dir path)]
+        (io/make-parents f)
+        (with-open [o (io/output-stream f)]
+          (.write o ^bytes content))
+        (when (= mode "100755")
+          (.setExecutable f true))))
+    (index/write-index git-dir entries)))
+
+(defn merge-branch
+  "現在のブランチ(ours=HEAD)に other(theirs)を統合。git merge 相当。
+   {:status :up-to-date|:fast-forward|:merged|:conflict ...} を返す。"
+  [dir other {:keys [author]}]
+  (let [git-dir (io/file dir ".git")
+        head (ref/read-ref git-dir "HEAD")
+        cur-ref (when (str/starts-with? head "ref: ")
+                  (subs head 5))
+        ours (ref/resolve-ref git-dir "HEAD")
+        theirs (ref/resolve-ref git-dir (str ref-head "/" other))
+        base (mg/merge-base git-dir ours theirs)]
+    (cond
+      (= ours theirs) {:status :up-to-date}
+      (= theirs base) {:status :up-to-date}
+      (= ours base) (let [entries (tree->entries git-dir (:tree (commit/read-commit git-dir theirs)))]
+                      (ref/update-ref git-dir cur-ref theirs)
+                      (materialize! dir git-dir entries)
+                      {:status :fast-forward :commit theirs})
+      :else (let [{:keys [merged conflicts]} (mg/merge-trees git-dir base ours theirs)]
+              (if (seq conflicts)
+                {:status :conflict :conflicts conflicts}
+                (let [entries (map (fn [[path {:keys [mode sha]}]]
+                                     {:mode mode :sha sha :path path})
+                                   merged)
+                      tree (build-tree git-dir entries)
+                      mc (commit/write-commit git-dir
+                                              {:tree tree
+                                               :parents [ours theirs]
+                                               :author author
+                                               :message (str "Merge branch '" other "'")})]
+                  (ref/update-ref git-dir cur-ref mc)
+                  (materialize! dir git-dir entries)
+                  {:status :merged :commit mc}))))))
